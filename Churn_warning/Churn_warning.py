@@ -50,7 +50,7 @@ churn_feat_space=churn_df.drop(to_drop,axis=1)
 
 # In[8]:
 
-
+#'yes'/'no'has to be converted to boolean values
 yes_no_cols=["Int'l Plan","VMail Plan"]
 churn_feat_space[yes_no_cols]=churn_feat_space[yes_no_cols]=='yes'
 

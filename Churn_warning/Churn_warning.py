@@ -90,16 +90,16 @@ from sklearn.model_selection import KFold
 # In[13]:
 
 
-def run_cv(X,y,clf_class,**kwargs):
+def run_cv(x,y,clf_class,**kwargs):
     kf = KFold(n_splits=5,shuffle=True,random_state=1)
     y_pred = y.copy()
 
     for train_index, test_index in kf.split(y):
-        X_train, X_test = X[train_index], X[test_index]
+        x_train, x_test = x[train_index], x[test_index]
         y_train = y[train_index]
         clf = clf_class(**kwargs)
-        clf.fit(X_train,y_train)
-        y_pred[test_index] = clf.predict(X_test)
+        clf.fit(x_train,y_train)
+        y_pred[test_index] = clf.predict(x_test)
     return y_pred
 
 

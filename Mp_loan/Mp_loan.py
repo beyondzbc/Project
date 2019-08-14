@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
-
+#数据下载：https://mirror.shileizcc.com/Other/LoanStats3a.csv
 # In[1]:
 
 

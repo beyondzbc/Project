@@ -391,3 +391,174 @@ print(result.decode())
 # 构造POST的数据，填入验证码  
 # POST提交
 
+
+# Scrapy  
+# 1、创建一个Scrapy项目  
+# 2、定义提取的Item  
+# 3、编写爬取网站的 spider 并提取 Item  
+# 4、编写 Item Pipeline 来存储提取到的Item(即数据)
+
+# In[33]:
+
+
+#创建项目
+# scrapy startproject tutorial    是在本地环境上创建   cmd
+#该命令会创建包含下面内容的tutorial目录：
+# tutorial/
+#     scrapy.cfg    该项目的配置文件
+#     tutorial/    该项目的python模块
+#         __init__.py    项目中的item文件
+#         items.py    项目中的item文件
+#         pipelines.py   项目中的pipelines文件
+#         settings.py    项目中的设置文件
+#         spiders/    放置spider代码的目录
+#             __init__.py
+#             ...
+
+#定义item
+#Item 是保存爬取到的数据的容器；其使用方法和python字典类似， 并且提供了额外保护机制来避免拼写错误导致的未定义字段错误。
+# 编辑tutorial中的item.py文件。代码如下：
+import scrapy
+class DmozItem(scrapy.Item):
+    title = scrapy.Field()
+    link = scrapy.Field()
+    desc = scrapy.Field()
+    
+#编写第一个爬虫（spider）
+#spider是用户编写用于从单个网站（或者一些网站）爬取数据的类
+# 其包含了一个用于下载的初始URL，如何跟进网页中的链接以及如何分析页面中的内容， 提取生成 item 的方法。
+class DmozSpider(scrapy.Spider):    #创建文件dmoz_spider放在tutorial/spiders目录下面
+    name = "dmoz"    #用于区别spider，必须唯一
+    allowed_domains = ["dmoz-odp.org"]
+    start_urls = [
+        "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/Books/",
+        "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/Resources/"
+    ]    #包含了Spider在启动时进行爬取的url列表。
+    
+    def parse(self, response):    #是spider的一个方法。 被调用时，每个初始URL完成下载后生成的 Response 对象将会作为唯一的参数传递给该函数。
+        filename = response.url.split("/")[-2]
+        with open(filename, 'wb') as f:
+            f.write(response.body)
+            
+#爬取
+#进入项目的根目录，执行下列命令启动spider：
+# scrapy crawl dmoz     在cmd下面运行   会在根目录下面创建url所对应内容的文件
+
+#提取item
+#进入项目根目录，执行下列命令来启动shell：
+# scrapy shell "http://www.dmoz.org/Computers/Programming/Languages/Python/Books/"
+
+
+# 提取item  
+# 进入项目根目录，执行下列命令来启动shell：  
+# scrapy shell "http://www.dmoz.org/Computers/Programming/Languages/Python/Books/"
+
+
+#提取数据
+response.xpath('//ul/li')     #选择该页面中网站列表里所有<li>元素
+response.xpath('//ul/li/text()').extract()    #网站的描述
+response.xpath('//ul/li/a/text()').extract()    #网站的标题
+response.xpath('//ul/li/a/@href').extract()    #网站的链接
+
+#拼接更多的.xpath()来进一步获取某个节点
+for sel in response.xpath('//ul/li'):
+    title = sel.xpath('a/text()').extract()
+    link = sel.xpath('a/@href').extract()
+    desc = sel.xpath('text()').extract()
+    print title, link, desc
+    
+#在spider中加入以下代码，再次爬取dmoz.org将会看到爬取到的网站信息被成功输出
+import scrapy
+
+class DmozSpider(scrapy.Spider):
+    name = "dmoz"
+    allowed_domains = ["dmoz-odp.org"]
+    start_urls = [
+        "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/Books/",
+        "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/Resources/"
+    ]
+
+    def parse(self, response):
+        for sel in response.xpath('//ul/li'):
+            title = sel.xpath('a/text()').extract()
+            link = sel.xpath('a/@href').extract()
+            desc = sel.xpath('text()').extract()
+            print title, link, desc
+
+            
+#使用item
+# item对象是自定义的python字典。可以使用标准的字典语法获取到其每个字段的值。
+>>> item = DmozItem()    #终端命令
+>>> item['title'] = 'Example title'
+>>> item['title']
+'Example title'
+
+# 为了将爬取的数据返回，最终的代码是：
+import scrapy
+
+from tutorial.items import DmozItem
+
+class DmozSpider(scrapy.Spider):
+    name = "dmoz"
+    allowed_domains = ["dmoz-odp.org"]
+    start_urls = [
+        "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/Books/",
+        "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/Resources/"
+    ]
+
+    def parse(self, response):
+        for sel in response.xpath('//ul/li'):
+            item = DmozItem()
+            item['title'] = sel.xpath('a/text()').extract()
+            item['link'] = sel.xpath('a/@href').extract()
+            item['desc'] = sel.xpath('text()').extract()
+            yield item
+            
+            
+#追踪连接
+#接来下不仅仅满足与爬取books及resources页面，想要过去所有python directory的内容。
+# 实现这个功能的改进版spider：
+import scrapy
+
+from tutorial.items import DmozItem
+
+class DmozSpider(scrapy.Spider):
+    name = "dmoz"
+    allowed_domains = ["dmoz-odp.org"]
+    start_urls = [
+        "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/",
+    ]
+
+    def parse(self, response):
+        for href in response.css("ul.directory.dir-col > li > a::attr('href')"):
+            url = response.urljoin(response.url, href.extract())
+            yield scrapy.Request(url, callback=self.parse_dir_contents)
+
+    def parse_dir_contents(self, response):
+        for sel in response.xpath('//ul/li'):
+            item = DmozItem()
+            item['title'] = sel.xpath('a/text()').extract()
+            item['link'] = sel.xpath('a/@href').extract()
+            item['desc'] = sel.xpath('text()').extract()
+            yield item
+            
+# 现在parse() 仅仅从页面中提取我们感兴趣的链接，使用 response.urljoin 方法构造一个绝对路径的URL(页面上的链接都是相对路径的)，
+# 产生(yield)一个请求， 该请求使用 parse_dir_contents() 方法作为回调函数, 用于最终产生我们想要的数据.。
+
+#保存爬到的数据
+# 最简单存储爬取的数据的方式是使用 Feed exports:
+# scrapy crawl dmoz -o items.json   终端命令
+# 该命令采用JSON格式对爬到的数据进行序列化，生成items.json文件
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+

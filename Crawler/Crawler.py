@@ -529,7 +529,7 @@ class DmozSpider(scrapy.Spider):
         "http://www.dmoz-odp.org/Computers/Programming/Languages/Python/",
     ]
 
-    def parse(self, response):
+    def parse(self, response):      #加个这段代码反而没有爬到数据
         for href in response.css("ul.directory.dir-col > li > a::attr('href')"):
             url = response.urljoin(response.url, href.extract())
             yield scrapy.Request(url, callback=self.parse_dir_contents)

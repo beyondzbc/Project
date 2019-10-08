@@ -7,18 +7,18 @@
 import pandas as pd
 import warnings
 warnings.filterwarnings('ignore')
-loans_2007=pd.read_csv('D:/pydata/LoanStats3a.csv',skiprows=1)
+loans_2007=pd.read_csv('./LoanStats3a.csv',skiprows=1)
 #清除不必要的列
 half_count=len(loans_2007)/2
 loans_2007=loans_2007.dropna(thresh=half_count,axis=1)
 loans_2007=loans_2007.drop(['desc','url'],axis=1)
-loans_2007.to_csv('D:/pydata/loans_2007.csv',index=False)
+loans_2007.to_csv('./loans_2007.csv',index=False)
 
 
 # In[2]:
 
 
-loans_2007=pd.read_csv('D:/pydata/loans_2007.csv')
+loans_2007=pd.read_csv('./loans_2007.csv')
 
 
 # In[3]:
@@ -85,14 +85,14 @@ loans_2007=loans_2007.drop(drop_columns,axis=1)
 # In[10]:
 
 
-loans_2007.to_csv('D:/pydata/filtered_loans_2007.csv',index=False)
+loans_2007.to_csv('./filtered_loans_2007.csv',index=False)
 
 
 # In[11]:
 
 
 #统计缺失值
-loans=pd.read_csv('D:/pydata/filtered_loans_2007.csv')
+loans=pd.read_csv('./filtered_loans_2007.csv')
 null_counts=loans.isnull().sum()
 
 
@@ -150,13 +150,13 @@ loans=pd.concat([loans,dummy_df],axis=1)
 loans=loans.drop(cat_columns,axis=1)
 loans=loans.drop('pymnt_plan',axis=1)
 
-loans.to_csv('D:/pydata/cleaned_loans2007.csv',index=False)
+loans.to_csv('./cleaned_loans2007.csv',index=False)
 
 
 # In[17]:
 
 
-loans=pd.read_csv('D:/pydata/cleaned_loans2007.csv')
+loans=pd.read_csv('./cleaned_loans2007.csv')
 
 
 # In[18]:
@@ -304,13 +304,5 @@ print(tpr)
 print(fpr)
 
 
-# In[ ]:
 
-
-# 模型效果不理想时，可以考虑的调整策略：
-# 1.调节正负样本的权重参数;
-# 2.更换模型算法;
-# 3.同时几个使用模型进行预测，然后取去测的最终结果;
-# 4.使用原数据，生成新特征;
-# 5.调整模型参数.
 

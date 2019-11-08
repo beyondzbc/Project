@@ -8,7 +8,7 @@ import pandas as pd
 import re
 import numpy as np
 from sqlalchemy import create_engine
-engine=create_engine('mysql+pymysql://root:Tsta@888@127.0.0.1:3306/data?charset=utf8')
+engine=create_engine('mysql+pymysql://root:******@127.0.0.1:3306/data?charset=utf8')
 import warnings
 warnings.filterwarnings('ignore')
 sql=pd.read_sql('all_gzdata',engine,chunksize=10000)
@@ -108,16 +108,4 @@ class Recommender():
     def recommend(self, a): #推荐函数
         return np.dot(self.sim, a)*(1-a)
   
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 

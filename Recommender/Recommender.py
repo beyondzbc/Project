@@ -405,9 +405,9 @@ def dropduplicate(i):
 
 count15 = [dropduplicate(i) for i in sql]
 count15 = pd.concat(count15)
-print(len(count15)) # 2012895
+print(len(count15)) # 2011695
 count16 = count15.drop_duplicates(['fullURL','userID','timestamp_format']) # 一定要进行二次删除重复，因为不同的块中会有重复值
-print(len(count16)) #　647300
+print(len(count16)) #　646915
 count16.to_sql('cleaned_three', engine)
 #数据清洗及保存到库的操作，清洗完毕
 
@@ -421,7 +421,7 @@ lens = 0
 for i in sql:
     temp = len(i)
     lens = temp + lens
-print(lens)  
+print(lens)  #836877
 
 
 # In[ ]:
@@ -433,7 +433,7 @@ lens1 = 0
 for i in sql1:
     temp = len(i)
     lens1 = temp + lens1
-print(lens1)
+print(lens1)#1341130
 
 
 # In[ ]:
@@ -445,7 +445,7 @@ lens2 = 0
 for i in sql2:
     temp = len(i)
     lens2 = temp + lens2
-print(lens2)
+print(lens2)#2011695
 
 
 # In[ ]:
@@ -502,6 +502,10 @@ for i in sql:  #初筛
     l4 += len(d)
     d.to_sql('changed_1', engine, index=False, if_exists = 'append') # 保存
 print(l4 )
+
+# In[ ]:
+
+
 sql = pd.read_sql('changed_1', engine, chunksize = 10000)
 def dropduplicate(i):  #二次筛选
     j = i[['realIP','fullURL','pageTitle','userID','timestamp_format']].copy()
@@ -509,6 +513,10 @@ def dropduplicate(i):  #二次筛选
 counts1 = [dropduplicate(i) for i in sql]
 counts1 = pd.concat(counts1)
 print(len(counts1))# 1095216
+
+# In[ ]:
+
+
 a = counts1.drop_duplicates(['fullURL','userID'])
 print(len(a))# 528166
 a.to_sql('changed_2', engine) # 保存
@@ -583,6 +591,10 @@ e = d[d['iszsk'] == 'infoelsezsk']
 for i in range(len(e)): #用上面已经处理的'iszsk'列分成两种类别的网址，分别使用正则表达式进行匹配,较慢
     e.iloc[i,2] = re.findall(pattern, e.iloc[i,0])[0]
 print(e.head())
+
+# In[ ]:
+
+
 # 对于http://www.lawtime.cn/zhishiku/laodong/info/***.html类型的网址进行这样匹配,获取二级类别名称"laodong"
 # 由于还有一类是http://www.lawtime.cn/zhishiku/laodong/***.html，所以使用'zhishiku/(.*?)/'进行匹配
 pattern1 = re.compile('zhishiku/(.*?)/',re.S)
@@ -668,6 +680,10 @@ for i in sql:
     zixun.to_sql('zixunformodel', engine, index=False,if_exists = 'append')
     hunyin.to_sql('hunyinformodel', engine, index=False,if_exists = 'append')
 print(l1,l2) # 393185 16982
+
+# In[ ]:
+
+
 # 方法二：
 m = counts17[counts17['type'] == 'zixun']
 n = counts17[counts17['fullURL'].str.contains('hunyin')]
